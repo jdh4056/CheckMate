@@ -20,5 +20,6 @@ public class Disease {
 
     private String name;
 
-    private String explain;
+    @Column(name = "description")
+    private String explain; //MySQL에서 예약어라서 컬럼명으로 쓰면 안 됨
 }
