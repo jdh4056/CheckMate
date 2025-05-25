@@ -20,13 +20,14 @@ public class Medicine {
     @JoinColumn(name = "prescription_id")
     private Prescription prescription;
 
+    @Column(length = 1000)
     private String medicineName;
-
+    @Column(length = 1000)
     private String efficient;
-
+    @Column(length = 1000)
     private String useMethod;
-
+    @Column(length = 1000)
     private String acquire;
-
+    @Column(length = 1500)
     private String warning;
 }
