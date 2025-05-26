@@ -118,4 +118,5 @@ public class DiseaseService {
         HostnameVerifier allHostsValid = (hostname, session) -> true;
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
     }
+
 }

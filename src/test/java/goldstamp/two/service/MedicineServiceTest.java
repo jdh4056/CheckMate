@@ -15,7 +15,7 @@ public class MedicineServiceTest {
     @Autowired MedicineService medicineService;
 
     @Test
-    void saveDB() throws IOException {
+    void saveDb() throws IOException {
         medicineService.saveMedicinesAll();
     }
 }

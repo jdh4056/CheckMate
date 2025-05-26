@@ -13,7 +13,7 @@ public class DiseaseServiceTest {
     @Autowired DiseaseService diseaseService;
 
     @Test
-    void saveDB() throws Exception {
+    void saveDb() throws Exception {
         diseaseService.saveDiseases();
     }
 }

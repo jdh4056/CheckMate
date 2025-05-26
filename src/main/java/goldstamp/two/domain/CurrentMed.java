@@ -14,4 +14,11 @@ public class CurrentMed {
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    public CurrentMed() {}
+
+    public CurrentMed(LocalDate startDate, LocalDate endDate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 }

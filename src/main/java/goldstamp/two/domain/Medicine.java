@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -14,12 +17,7 @@ public class Medicine {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "medicine_id")
     private long id;
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "prescription_id")
-    private Prescription prescription;
-
+    // 약에서 딱히 참조할 이유 없다
     @Column(length = 1000)
     private String medicineName;
     @Column(length = 1000)
