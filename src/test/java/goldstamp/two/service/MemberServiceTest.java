@@ -27,11 +27,11 @@ public class MemberServiceTest {
         //then
         // memberRepository.findById()는 Optional을 반환하므로 .get() 또는 .orElseThrow() 사용
         // 여기서는 서비스 계층의 findOne을 사용하는 것이 더 적절합니다.
-        Member foundMember = memberService.findOne(savedId); // memberRepositoryImpl.findOne 대신 memberService.findOne 사용
+        Member foundMember = memberService.findOne(savedId);// memberRepositoryImpl.findOne 대신 memberService.findOne 사용
         Assertions.assertEquals(member.getLoginId(), foundMember.getLoginId()); // 객체 비교 대신 필드 비교 권장
         // Assertions.assertEquals(member, foundMember); // 이 비교는 객체 동일성(메모리 주소)을 비교할 수 있어 실패할 수 있습니다.
         // 필드 값 비교가 더 정확합니다.
-        Assertions.assertEquals(member, memberRepository.findById(savedId));
+        //Assertions.assertEquals(member, memberRepository.findById(savedId));
     }
 
     @Test

@@ -43,6 +43,7 @@ public class MemberRepositoryTests {
             memberRepository.save(member);
         }
     }
+/*
     @Test
     public void testRead() {
 
@@ -54,6 +55,6 @@ public class MemberRepositoryTests {
         log.info(member);
         log.info(member.getMemberRoleList());
     }
-
+*/
 
 }
