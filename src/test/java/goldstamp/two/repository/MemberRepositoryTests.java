@@ -51,6 +51,7 @@ public class MemberRepositoryTests {
         log.info(member.getMemberRoleList());
     }
 
+
     /*
     @Test
     public void testInsertMember() {
