@@ -30,6 +30,7 @@ public class Member {
     @JsonIgnore
     private String password; //사용자 비밀번호
 
+    @Column(nullable = false, columnDefinition = "NUMBER(1,0) DEFAULT 0")
     private boolean social; //소셜 로그인 여부
 
     @ElementCollection(fetch = FetchType.LAZY) //권한 목록 (일반 사용자, 관리자 등)

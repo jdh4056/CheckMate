@@ -21,70 +21,63 @@ import java.util.Map;
 @Log4j2
 public class JWTCheckFilter extends OncePerRequestFilter {
 
-    //예외 경로로 들어오면 filtering 안함. 예 : 로그인 화면
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-
-        //true == not checking
 
         String path = request.getRequestURI();
 
         log.info("check uri----------"+path);
 
-        if(path.startsWith("/api/member/")){
+        // `/members/login`, `/members` (회원가입), `/members/{id}/refresh` 경로를 필터링 건너뛰도록 설정
+        // `members/**`는 `/members/`로 시작하는 모든 경로를 포함합니다.
+        if(path.startsWith("/members/login") || path.equals("/members") || path.startsWith("/members/") && path.endsWith("/refresh") ){
             return true;
         }
 
-        //flase == checking
         return false;
     }
 
     @Override
-            protected void doFilterInternal (HttpServletRequest request, HttpServletResponse
+    protected void doFilterInternal (HttpServletRequest request, HttpServletResponse
             response, FilterChain filterChain) throws ServletException, IOException {
-                log.info("------------------JWTCheckFilter.................");
-                String authHeaderStr = request.getHeader("Authorization");
+        log.info("------------------JWTCheckFilter.................");
+        String authHeaderStr = request.getHeader("Authorization");
 
-                try {
-                    //Bearer accestoken...
-                    String accessToken = authHeaderStr.substring(7);
-                    Map<String, Object> claims = JWTUtil.validateToken(accessToken);
+        try {
+            //Bearer accestoken...
+            String accessToken = authHeaderStr.substring(7);
+            Map<String, Object> claims = JWTUtil.validateToken(accessToken);
 
-                    log.info("JWT claims: " + claims);
+            log.info("JWT claims: " + claims);
 
-                    //filterChain.doFilter(request, response);
+            Long id = ((Number) claims.get("id")).longValue();
+            String loginId = (String) claims.get("loginId");
+            String password = (String) claims.get("password");
+            String name = (String) claims.get("name");
+            Boolean social = (Boolean) claims.get("social");
+            List<String> roleNames = (List<String>) claims.get("roleNames");
+            MemberDto memberDTO = new MemberDto(id, loginId, password, name, social.booleanValue(),
+                    roleNames);
+            log.info("-----------------------------------");
+            log.info(memberDTO);
+            log.info(memberDTO.getAuthorities());
 
-                    String loginId = (String) claims.get("loginId");
-                    String password = (String) claims.get("password");
-                    String name = (String) claims.get("name");
-                    Boolean social = (Boolean) claims.get("social");
-                    List<String> roleNames = (List<String>) claims.get("roleNames");
-                    MemberDto memberDTO = new MemberDto(loginId, password, name, social.booleanValue(),
-                            roleNames);
-                    log.info("-----------------------------------");
-                    log.info(memberDTO);
-                    log.info(memberDTO.getAuthorities());
+            UsernamePasswordAuthenticationToken authenticationToken
+                    = new UsernamePasswordAuthenticationToken(memberDTO, password, memberDTO.getAuthorities());
 
-                    UsernamePasswordAuthenticationToken authenticationToken
-                            = new UsernamePasswordAuthenticationToken(memberDTO, password, memberDTO.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            filterChain.doFilter(request, response);
 
-                    filterChain.doFilter(request, response);
-
-                } catch (Exception e) {
-                    log.error("JWT Check Error..............");
-                    log.error(e.getMessage());
-                    Gson gson = new Gson();
-                    String msg = gson.toJson(Map.of("error", "ERROR_ACCESS_TOKEN"));
-                    response.setContentType("application/json");
-                    PrintWriter printWriter = response.getWriter();
-                    printWriter.println(msg);
-                    printWriter.close();
-                }
-            }
+        } catch (Exception e) {
+            log.error("JWT Check Error..............");
+            log.error(e.getMessage());
+            Gson gson = new Gson();
+            String msg = gson.toJson(Map.of("error", "ERROR_ACCESS_TOKEN"));
+            response.setContentType("application/json");
+            PrintWriter printWriter = response.getWriter();
+            printWriter.println(msg);
+            printWriter.close();
         }
-
-
-
-
+    }
+}

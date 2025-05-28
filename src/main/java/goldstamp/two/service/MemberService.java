@@ -5,11 +5,11 @@ import goldstamp.two.dto.MemberRequestDto;
 import goldstamp.two.repository.MemberRepository;
 import goldstamp.two.repository.MemberRepositoryClass;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.lang.IllegalArgumentException;
 import java.util.List;
-import java.util.Optional; // findById 사용을 위해 Optional import
 
 @Service
 @Transactional(readOnly = true)
@@ -18,11 +18,13 @@ public class MemberService {
 
     private final MemberRepositoryClass memberRepositoryClass;
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     //회원 가입
     @Transactional
     public long join(Member member) {
         validateDuplicateMemberID(member); //중복 회원 아이디 검증
+        member.setPassword(passwordEncoder.encode(member.getPassword()));
         memberRepositoryClass.save(member); // JpaRepository의 save 메서드 사용
         return member.getId();
     }
@@ -50,7 +52,7 @@ public class MemberService {
     @Transactional
     public void updatePassword(long id, String passward) {
         Member member = memberRepositoryClass.findById(id);
-        member.setPassword(passward);
+        member.setPassword(passwordEncoder.encode(passward));
         // @Transactional이 있으므로 save 호출 없이 더티 체킹으로 자동 반영됩니다.
     }
 
@@ -69,11 +71,20 @@ public class MemberService {
         }
         if (request.getLoginId() != null) member.setLoginId(request.getLoginId());
         if (request.getName() != null) member.setName(request.getName());
-        if (request.getPassword() != null) member.setPassword(request.getPassword());
+        if (request.getPassword() != null) member.setPassword(passwordEncoder.encode(request.getPassword()));
         if (request.getGender() != null) member.setGender(request.getGender());
         if (request.getBirthDay() != null) member.setBirthDay(request.getBirthDay());
         if (request.getHeight() != 0) member.setHeight(request.getHeight());
         if (request.getWeight() != 0) member.setWeight(request.getWeight());
+    }
+    // 회원 탈퇴
+    @Transactional
+    public void deleteMember(Long id) {
+        Member member = memberRepositoryClass.findById(id);
+        if (member == null) {
+            throw new IllegalArgumentException("Invalid member ID");
+        }
+        memberRepository.deleteById(id);
     }
 }
 
