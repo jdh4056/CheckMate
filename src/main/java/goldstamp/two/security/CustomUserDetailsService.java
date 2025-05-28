@@ -32,6 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         MemberDto memberDTO = new MemberDto(
+                member.getId(), // id 필드 추가
                 member.getLoginId(),
                 member.getPassword(),
                 member.getName(),
