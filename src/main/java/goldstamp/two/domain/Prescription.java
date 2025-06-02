@@ -1,5 +1,6 @@
 package goldstamp.two.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // JsonIgnore 임포트 추가
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class Prescription {
     @Column(name = "prescription_id")
     private long id;
 
+    @JsonIgnore // Member와 Prescription은 양방향 관계이므로 한쪽에 JsonIgnore 추가
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -28,8 +30,10 @@ public class Prescription {
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL)
     private List<PrescriptionMedicine> prescriptionMedicines = new ArrayList<>();
 
+    @Column(length = 1000)
     private String name;
 
+    @Column(length = 3000)
     private String description;
 
     public void setMember(Member member) {

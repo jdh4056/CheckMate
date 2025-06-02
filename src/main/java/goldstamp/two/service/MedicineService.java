@@ -23,6 +23,13 @@ public class MedicineService {
     @Autowired
     private MedicineRepository medicineRepository;
 
+    public List<Medicine> searchMedicines(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ArrayList<>(); // 빈 문자열이나 null이 오면 빈 리스트 반환
+        }
+        return medicineRepository.findByMedicineNameContainingIgnoreCase(keyword); //
+    }
+
     public void saveMedicinesAll() throws IOException {
         Integer pageNo = 1;
         while (true) {

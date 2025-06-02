@@ -9,13 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MedicineDto {
+    private Long id; // Medicine 엔티티의 ID 필드 추가
     private String medicineName;
-
     private String efficient;
-
     private String useMethod;
-
     private String acquire;
-
     private String warning;
 }

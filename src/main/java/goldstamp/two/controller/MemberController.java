@@ -1,5 +1,6 @@
 package goldstamp.two.controller;
 import goldstamp.two.domain.Member;
+import goldstamp.two.domain.MemberRole;
 import goldstamp.two.dto.LoginRequestDto;
 import goldstamp.two.dto.MemberDto;
 import goldstamp.two.dto.MemberRequestDto;
@@ -53,6 +54,7 @@ public class MemberController {
         member.setBirthDay(request.getBirthDay());
         member.setHeight(request.getHeight());
         member.setWeight(request.getWeight());
+        member.addRole(MemberRole.USER); // 회원가입 시 기본 USER 역할 부여
         Long id = memberService.join(member);
         return new CreateMemberResponse(id);
     }
@@ -153,7 +155,7 @@ public class MemberController {
     }
 
     @PatchMapping("/members/{id}")
-    public MemberResponseDto updateMemberResponse(
+    public MemberResponseDto updateMember(
             @PathVariable("id") Long id,
             @RequestBody @Valid MemberRequestDto request) {
         memberService.updateMember(id, request);
