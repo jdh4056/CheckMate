@@ -1,6 +1,8 @@
 package goldstamp.two.config;
 
 import goldstamp.two.security.filter.JWTCheckFilter;
+import goldstamp.two.security.handler.APILoginFailHandler;
+import goldstamp.two.security.handler.APILoginSuccessHandler;
 import goldstamp.two.security.handler.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -49,12 +51,12 @@ public class CustomSecurityConfig {
 
         http.csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable());
 
-        // http.formLogin 제거
-        // http.formLogin(config -> {
-        //     config.loginPage("/api/member/login");
-        //     config.successHandler(new APILoginSuccessHandler());
-        //     config.failureHandler(new APILoginFailHandler());
-        // });
+//         //http.formLogin 제거
+//         http.formLogin(config -> {
+//             config.loginPage("/members/login");
+//             config.successHandler(new APILoginSuccessHandler());
+//             config.failureHandler(new APILoginFailHandler());
+//         });
 
         http.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
 

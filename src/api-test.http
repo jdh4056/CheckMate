@@ -1,0 +1,8 @@
+### 로그인 요청
+POST http://10.0.2.2:8080/members/login
+Content-Type: application/json
+
+{
+    "loginId": "euijin@euijin.com", // 실제 테스트 계정 ID 입력
+    "password": "euijin@euijin.com" // 실제 테스트 계정 비밀번호 입력 (InitServiceTest에서 사용된 비밀번호)
+}

@@ -1,3 +1,4 @@
+// front + back/back/src/main/java/goldstamp/two/service/DiseaseService.java
 package goldstamp.two.service;
 
 import goldstamp.two.domain.Disease;
@@ -25,6 +26,13 @@ public class DiseaseService {
 
     @Autowired
     DiseaseRepository diseaseRepository;
+
+    public List<Disease> searchDiseases(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new ArrayList<>(); // 빈 문자열이나 null이 오면 빈 리스트 반환
+        }
+        return diseaseRepository.findByNameContainingIgnoreCase(keyword);
+    }
 
     public void saveDiseases() throws Exception {
         disableSslVerification();
@@ -76,20 +84,40 @@ public class DiseaseService {
                 String name = cntntssj != null ? cntntssj.text().trim() : "";
 
                 Element contentElement = doc.selectFirst("CNTNTS_CL_CN");
-                String explain = contentElement != null ? contentElement.text().trim() : "";
+                String explainUrl = contentElement != null ? contentElement.text().trim() : ""; // URL로 가져옴
+                String explain = "";
+
+                // EXPLAIN URL이 실제 URL 형태이고 비어있지 않다면, 해당 URL에서 실제 설명을 가져옴
+                if (!explainUrl.isEmpty() && explainUrl.startsWith("http")) {
+                    try {
+                        explain = fetchDescriptionFromUrl(explainUrl); // 실제 설명 텍스트를 파싱하는 메서드 호출
+                        // 길이가 3000자를 초과하면 잘라냅니다.
+                        if (explain.getBytes(StandardCharsets.UTF_8).length > 3000) {
+                            explain = new String(explain.getBytes(StandardCharsets.UTF_8), 0, 3000, StandardCharsets.UTF_8);
+                            System.out.println("Truncated (too long): " + number);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Failed to fetch description from URL for contentSn: " + number + " - " + e.getMessage());
+                        explain = "설명 로드 실패: " + explainUrl; // 실패 시 메시지 저장
+                    }
+                } else {
+                    explain = explainUrl; // URL이 아니거나 비어있으면 그대로 사용 (공백일 가능성)
+                }
+
 
                 if (!name.isEmpty() && !explain.isEmpty()) {
+                    // DB 컬럼 길이를 초과하는지 다시 한번 확인 (fetchDescriptionFromUrl 내에서 이미 처리했더라도)
                     if (explain.getBytes(StandardCharsets.UTF_8).length <= 3000) {
                         Disease disease = new Disease();
                         disease.setName(name);
                         disease.setExplain(explain);
                         diseases.add(disease);
-                        System.out.println("Parsed: " + number);
+                        System.out.println("Parsed: " + number + " | Name: " + name + " | Explain Length: " + explain.length());
                     } else {
-                        System.out.println("Skipped (too long): " + number + " | length=" + explain.length());
+                        System.out.println("Skipped (too long after fetch): " + number + " | length=" + explain.length());
                     }
                 } else {
-                    System.out.println("No content for contentSn: " + number);
+                    System.out.println("No content for contentSn: " + number + " | Name empty: " + name.isEmpty() + " | Explain empty: " + explain.isEmpty());
                 }
 
             } catch (Exception e) {
@@ -101,6 +129,47 @@ public class DiseaseService {
         diseaseRepository.saveAll(diseases);
         System.out.println("Saved items to DB: " + diseases.size());
     }
+
+    // 주어진 URL에서 실제 질병 설명을 파싱하여 반환하는 헬퍼 메서드
+    private String fetchDescriptionFromUrl(String url) throws Exception {
+        disableSslVerification(); // 내부 URL 요청에도 SSL 검증 우회 적용
+        URL pageUrl = new URL(url);
+        // Jsoup을 사용하여 HTML 페이지를 가져오고 파싱합니다.
+        // 여기서는 페이지 구조를 알 수 없으므로, 모든 <p> 태그의 텍스트를 가져오는 예시를 사용합니다.
+        // 실제 페이지 구조에 따라 .select() 메서드의 셀렉터를 조정해야 합니다.
+        Document doc = Jsoup.parse(pageUrl, 5000); // 5초 타임아웃
+        StringBuilder description = new StringBuilder();
+
+        // 예시: <p> 태그의 내용을 가져오거나, 특정 클래스/ID의 div에서 내용을 가져올 수 있습니다.
+        // 정확한 셀렉터는 공공데이터 포털에서 제공하는 상세 설명 페이지의 HTML 구조를 분석해야 합니다.
+        // 임시로, 가장 일반적인 텍스트 내용을 포함할 만한 태그들을 순회하여 가져옵니다.
+        // 예를 들어, 상세 설명 페이지에 <div class="content_view"> 안에 설명이 있다면
+        // Elements contentDivs = doc.select("div.content_view");
+        // for (Element div : contentDivs) { description.append(div.text()).append("\n"); }
+
+        // 현재로서는 특정 HTML 구조를 모르므로, 단순화하여 body의 모든 텍스트를 가져오거나,
+        // 중요한 텍스트를 포함할 가능성이 있는 태그들을 선택적으로 가져옵니다.
+        // 또는, "본문"이나 "내용"과 관련된 특정 ID/클래스 요소를 찾아야 합니다.
+        // 예를 들어, <div id="healthContent">와 같은.
+        Element mainContent = doc.body(); // 일단 body 전체를 가져오고
+        if (mainContent != null) {
+            // 모든 텍스트를 가져오되, 불필요한 공백과 줄바꿈을 제거하고 정리합니다.
+            // 실제 웹페이지에서 설명 텍스트를 정확히 식별하는 셀렉터를 사용해야 합니다.
+            // 예를 들어, doc.select(".class-name-of-description").text()
+            // 여기서는 임시로 <p> 태그의 텍스트만 가져오는 예시로 설정합니다.
+            doc.select("p").forEach(p -> description.append(p.text()).append("\n"));
+            // 만약 p 태그만으로는 부족하다면, 다른 텍스트 요소를 추가로 고려해야 합니다.
+            // description.append(mainContent.text().trim()); // 모든 텍스트 가져오기 (매우 클 수 있음)
+        }
+
+        // 설명 내용이 너무 길어질 경우, DB 컬럼 길이(3000)에 맞춰 잘라낼 수 있습니다.
+        String finalExplain = description.toString().trim();
+        if (finalExplain.getBytes(StandardCharsets.UTF_8).length > 3000) {
+            finalExplain = new String(finalExplain.getBytes(StandardCharsets.UTF_8), 0, 3000, StandardCharsets.UTF_8);
+        }
+        return finalExplain;
+    }
+
     // SSL 검증 우회 메서드
     private static void disableSslVerification() throws Exception {
         TrustManager[] trustAllCerts = new TrustManager[]{
