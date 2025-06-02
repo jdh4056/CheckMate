@@ -1,5 +1,5 @@
 ### 로그인 요청
-POST http://10.0.2.2:8080/members/login
+POST https://api.ssucheckmate.com/members/login
 Content-Type: application/json
 
 {
