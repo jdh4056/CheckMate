@@ -154,6 +154,24 @@ public class MemberController {
         }
     }
 
+    // 추가: 특정 멤버 정보 조회 API (GET /members/{id})
+    @GetMapping("/members/{id}")
+    public ResponseEntity<MemberResponseDto> getMemberInfo(@PathVariable("id") Long id) {
+        Member findMember = memberService.findOne(id);
+        if (findMember == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(new MemberResponseDto(
+                findMember.getId(),
+                findMember.getLoginId(),
+                findMember.getName(),
+                findMember.getGender(),
+                findMember.getBirthDay(),
+                findMember.getHeight(),
+                findMember.getWeight()
+        ));
+    }
+
     @PatchMapping("/members/{id}")
     public MemberResponseDto updateMember(
             @PathVariable("id") Long id,
@@ -213,7 +231,7 @@ public class MemberController {
         } catch (IllegalArgumentException e) {
             log.warn("Member deletion failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
+        } catch (Exception e) { // IllegalAccessException 대신 일반 Exception으로 처리
             log.error("Error deleting member with ID {}: {}", memberIdToDelete, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during member deletion.");
         }
