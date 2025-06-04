@@ -18,4 +18,8 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     // Member ID로 처방전 리스트 조회 시 필요한 연관 관계를 즉시 로딩하도록 EntityGraph 추가
     @EntityGraph(attributePaths = {"disease", "prescriptionMedicines", "prescriptionMedicines.medicine"})
     List<Prescription> findByMember_Id(Long memberId);
+
+    // Member ID와 질병 이름으로 처방전 리스트 조회 (추가)
+    @EntityGraph(attributePaths = {"disease", "prescriptionMedicines", "prescriptionMedicines.medicine"})
+    List<Prescription> findByMember_IdAndDisease_NameContainingIgnoreCase(Long memberId, String diseaseName);
 }

@@ -9,6 +9,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // Transactional 임포트 추가
 
 import javax.net.ssl.*;
 import java.io.InputStream;
@@ -32,6 +33,20 @@ public class DiseaseService {
             return new ArrayList<>(); // 빈 문자열이나 null이 오면 빈 리스트 반환
         }
         return diseaseRepository.findByNameContainingIgnoreCase(keyword);
+    }
+
+    @Transactional // 질병 생성 메서드에 트랜잭션 추가
+    public Disease findOrCreateDisease(String diseaseName) {
+        List<Disease> existingDiseases = diseaseRepository.findByNameContainingIgnoreCase(diseaseName);
+        if (!existingDiseases.isEmpty()) {
+            return existingDiseases.get(0); // 이미 존재하면 첫 번째 질병 반환
+        } else {
+            // 존재하지 않으면 새로운 질병 생성
+            Disease newDisease = new Disease();
+            newDisease.setName(diseaseName);
+            newDisease.setExplain("등록된 설명이 없습니다."); // 기본 설명
+            return diseaseRepository.save(newDisease); // 저장 후 반환
+        }
     }
 
     public void saveDiseases() throws Exception {
@@ -135,8 +150,7 @@ public class DiseaseService {
         disableSslVerification(); // 내부 URL 요청에도 SSL 검증 우회 적용
         URL pageUrl = new URL(url);
         // Jsoup을 사용하여 HTML 페이지를 가져오고 파싱합니다.
-        // 여기서는 페이지 구조를 알 수 없으므로, 모든 <p> 태그의 텍스트를 가져오는 예시를 사용합니다.
-        // 실제 페이지 구조에 따라 .select() 메서드의 셀렉터를 조정해야 합니다.
+        // 이 메서드 내에서 doc 변수를 새로 선언합니다.
         Document doc = Jsoup.parse(pageUrl, 5000); // 5초 타임아웃
         StringBuilder description = new StringBuilder();
 
@@ -151,7 +165,7 @@ public class DiseaseService {
         // 중요한 텍스트를 포함할 가능성이 있는 태그들을 선택적으로 가져옵니다.
         // 또는, "본문"이나 "내용"과 관련된 특정 ID/클래스 요소를 찾아야 합니다.
         // 예를 들어, <div id="healthContent">와 같은.
-        Element mainContent = doc.body(); // 일단 body 전체를 가져오고
+        Element mainContent = doc.body(); // 이제 doc 변수가 이 스코프 내에서 유효합니다.
         if (mainContent != null) {
             // 모든 텍스트를 가져오되, 불필요한 공백과 줄바꿈을 제거하고 정리합니다.
             // 실제 웹페이지에서 설명 텍스트를 정확히 식별하는 셀렉터를 사용해야 합니다.

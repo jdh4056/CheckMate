@@ -1,6 +1,7 @@
 package goldstamp.two.controller;
 
 import goldstamp.two.domain.Medicine;
+import goldstamp.two.dto.MedicineDto;
 import goldstamp.two.service.MedicineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,21 @@ public class MedicineController {
     private final MedicineService medicineService;
 
     @GetMapping
-    public ResponseEntity<List<String>> autocompleteMedicines(@RequestParam("query") String query) {
+    public ResponseEntity<List<MedicineDto>> searchMedicines(@RequestParam("query") String query) { // Method name changed for clarity, return type changed
         List<Medicine> medicines = medicineService.searchMedicines(query);
-        // 약 객체 리스트에서 이름(medicineName)만 추출하여 반환
-        List<String> medicineNames = medicines.stream()
-                .map(Medicine::getMedicineName)
+        // 약 객체 리스트에서 MedicineDto로 변환하여 반환
+        List<MedicineDto> medicineDtos = medicines.stream()
+                .map(medicine -> MedicineDto.builder()
+                        .id(medicine.getId())
+                        .medicineName(medicine.getMedicineName())
+                        .efficient(medicine.getEfficient())
+                        .useMethod(medicine.getUseMethod())
+                        .acquire(medicine.getAcquire())
+                        .warning(medicine.getWarning())
+                        .build())
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(medicineNames);
+        return ResponseEntity.ok(medicineDtos);
     }
 }
+

@@ -1,10 +1,11 @@
 package goldstamp.two.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore; // JsonIgnore 임포트 추가
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public class Prescription {
     @Column(name = "prescription_id")
     private long id;
 
-    @JsonIgnore // Member와 Prescription은 양방향 관계이므로 한쪽에 JsonIgnore 추가
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
@@ -36,6 +37,8 @@ public class Prescription {
     @Column(length = 3000)
     private String description;
 
+    private LocalDate prescriptionDate; //
+
     public void setMember(Member member) {
         this.member = member;
         member.getPrescriptions().add(this);
@@ -49,13 +52,25 @@ public class Prescription {
         prescriptionMedicine.setPrescription(this);
     }
 
-    public static Prescription createPrescription(Member member, Disease disease, PrescriptionMedicine... prescriptionMedicines) {
+    // prescriptionDate를 인자로 받도록 createPrescription 메서드 수정
+    public static Prescription createPrescription(Member member, Disease disease, LocalDate prescriptionDate, PrescriptionMedicine... prescriptionMedicines) {
         Prescription prescription = new Prescription();
         prescription.setMember(member);
         prescription.setDisease(disease);
         for (PrescriptionMedicine prescriptionMedicine : prescriptionMedicines ) {
             prescription.addMedicine(prescriptionMedicine);
         }
+        prescription.setPrescriptionDate(prescriptionDate); // 인자로 받은 날짜 설정
+        return prescription;
+    }
+
+    // 빈 처방전 생성 시 사용할 팩토리 메서드 (선택 사항)
+    public static Prescription createEmptyPrescription(Member member, LocalDate prescriptionDate) {
+        Prescription prescription = new Prescription();
+        prescription.setMember(member);
+        prescription.setName("미지정 질병");
+        prescription.setDescription("설명 없음");
+        prescription.setPrescriptionDate(prescriptionDate);
         return prescription;
     }
 }

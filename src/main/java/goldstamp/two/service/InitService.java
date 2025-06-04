@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.time.LocalTime; // LocalTime 임포트 추가
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,11 +38,23 @@ public class InitService {
         for (Medicine medicine : medicines) {
             PrescriptionMedicine pm = new PrescriptionMedicine();
             pm.setMedicine(medicine);
+            // 새롭게 추가된 필드 설정 (예시 값)
+            pm.setStartDate(LocalDate.of(2025, 6, 1));
+            pm.setEndDate(LocalDate.of(2025, 6, 7));
+            pm.setNumPerDay(3); // Integer 타입으로 변경되었으므로 명시적으로 값 설정
+            pm.setAlarmTimer1(LocalTime.of(9, 0));
+            pm.setAlarmTimer2(LocalTime.of(13, 0));
+            pm.setAlarmTimer3(LocalTime.of(18, 0));
+            pm.setAlarmTimer4(null); // 필요 없으면 null
+            pm.setDose(1); // 용량 설정
+            pm.setDoseType("정"); // 용량 타입 설정
+            pm.calculateTotalDrugNum(); // totalDrugNum 계산
             pmList.add(pm);
         }
         Prescription prescription = Prescription.createPrescription(
                 member,
                 diseaseRepository.findByName("감기"),
+                LocalDate.now(), // 추가: 현재 날짜를 prescriptionDate로 전달
                 pmList.toArray(new PrescriptionMedicine[0])
         );
 
@@ -56,11 +69,23 @@ public class InitService {
         for (Medicine medicine : medicines) {
             PrescriptionMedicine pm = new PrescriptionMedicine();
             pm.setMedicine(medicine);
+            // 새롭게 추가된 필드 설정 (예시 값)
+            pm.setStartDate(LocalDate.of(2025, 5, 15));
+            pm.setEndDate(LocalDate.of(2025, 5, 20));
+            pm.setNumPerDay(2); // Integer 타입으로 변경되었으므로 명시적으로 값 설정
+            pm.setAlarmTimer1(LocalTime.of(10, 0));
+            pm.setAlarmTimer2(LocalTime.of(16, 0));
+            pm.setAlarmTimer3(null);
+            pm.setAlarmTimer4(null);
+            pm.setDose(5); // 용량 설정
+            pm.setDoseType("ml"); // 용량 타입 설정
+            pm.calculateTotalDrugNum(); // totalDrugNum 계산
             pmList.add(pm);
         }
         Prescription prescription = Prescription.createPrescription(
                 member,
                 diseaseRepository.findByName("열상"),
+                LocalDate.now(), // 추가: 현재 날짜를 prescriptionDate로 전달
                 pmList.toArray(new PrescriptionMedicine[0])
         );
 
