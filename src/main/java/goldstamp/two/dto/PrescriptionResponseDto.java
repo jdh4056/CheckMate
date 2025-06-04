@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate; // LocalDate 임포트 추가
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,8 +19,9 @@ public class PrescriptionResponseDto {
     private Long id;
     private String name;
     private String description;
+    private LocalDate prescriptionDate; // prescriptionDate 필드 추가
     private DiseaseDto disease; // Disease 정보를 담을 DTO
-    private List<MedicineDto> medicines; // Medicine 정보를 담을 DTO 리스트
+    private List<PrescriptionMedicineResponseDto> medicines; // Medicine 정보를 담을 DTO 리스트 (타입 변경)
 
     // Prescription 엔티티를 DTO로 변환하는 팩토리 메서드
     public static PrescriptionResponseDto fromEntity(goldstamp.two.domain.Prescription prescription) {
@@ -33,24 +35,18 @@ public class PrescriptionResponseDto {
                     .build();
         }
 
-        // prescriptionMedicines 리스트를 MedicineDto 리스트로 변환
-        List<MedicineDto> medicineDtos = prescription.getPrescriptionMedicines().stream()
-                .map(pm -> MedicineDto.builder()
-                        .id(pm.getMedicine().getId()) // Medicine 엔티티의 ID
-                        .medicineName(pm.getMedicine().getMedicineName())
-                        .efficient(pm.getMedicine().getEfficient())
-                        .useMethod(pm.getMedicine().getUseMethod())
-                        .acquire(pm.getMedicine().getAcquire())
-                        .warning(pm.getMedicine().getWarning())
-                        .build())
+        // prescriptionMedicines 리스트를 PrescriptionMedicineResponseDto 리스트로 변환
+        List<PrescriptionMedicineResponseDto> prescriptionMedicineDtos = prescription.getPrescriptionMedicines().stream()
+                .map(pm -> PrescriptionMedicineResponseDto.fromEntity(pm)) // PrescriptionMedicineResponseDto의 fromEntity 사용
                 .collect(Collectors.toList());
 
         return PrescriptionResponseDto.builder()
                 .id(prescription.getId())
                 .name(prescription.getName())
                 .description(prescription.getDescription())
+                .prescriptionDate(prescription.getPrescriptionDate()) // 필드 값 설정
                 .disease(diseaseDto)
-                .medicines(medicineDtos)
+                .medicines(prescriptionMedicineDtos) // 변경된 DTO 리스트 사용
                 .build();
     }
 }
