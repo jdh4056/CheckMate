@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/dto/MemberResponseDto.java
 package goldstamp.two.dto;
 
 import goldstamp.two.domain.Gender;

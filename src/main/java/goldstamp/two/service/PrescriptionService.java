@@ -1,14 +1,16 @@
+// front + back/back/main/java/goldstamp/two/service/PrescriptionService.java
 package goldstamp.two.service;
 
 import goldstamp.two.domain.*;
 import goldstamp.two.dto.PrescriptionRequestDto;
-import goldstamp.two.dto.PrescriptionMedicineRequestDto; // PrescriptionMedicineRequestDto 임포트 추가
+import goldstamp.two.dto.PrescriptionMedicineRequestDto;
 import goldstamp.two.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -26,7 +28,7 @@ public class PrescriptionService {
     private final DiseaseRepository diseaseRepository;
     private final MedicineRepository medicineRepository;
     private final PrescriptionRepository prescriptionRepository;
-    private final DiseaseService diseaseService; // DiseaseService 주입 추가
+    private final DiseaseService diseaseService;
 
 
     @Transactional
@@ -75,9 +77,6 @@ public class PrescriptionService {
         log.debug("질병 조회 성공: {}, Explain: {}", disease.getName(), disease.getExplain());
 
         // 3. 해당 질병 이름이 들어간 약 효능으로 약 조회 (여기서는 PrescriptionMedicine에 상세 정보가 없으므로 기본값으로 설정)
-        // 이 부분은 createPrescriptionByDiseaseName의 목적이 질병 기반 처방전 생성임을 고려하여,
-        // 약 정보는 나중에 addMedicineToPrescription으로 추가하는 것이 더 적절할 수 있습니다.
-        // 현재는 기존 로직을 유지하되, PrescriptionMedicine에 추가된 필드는 기본값으로 설정합니다.
         List<Medicine> medicines = medicineRepository.findByEfficientContaining(disease.getName());
         log.debug("질병 효능으로 찾은 약 개수: {}", medicines.size());
 
@@ -85,18 +84,12 @@ public class PrescriptionService {
                 .map(medicine -> {
                     PrescriptionMedicine pm = new PrescriptionMedicine();
                     pm.setMedicine(medicine);
-                    // 새로 추가된 필드들은 기본값으로 설정하거나, 필요에 따라 DTO를 통해 받을 수 있도록 확장
-                    // 복약 시작일은 질병 진단 날짜와 동일하게 설정
                     pm.setStartDate(requestDto.getPrescriptionDate());
-                    pm.setEndDate(null); // 또는 LocalDate.now().plusDays(7)
-                    pm.setNumPerDay(0); // Integer 타입으로 변경되었으므로 0으로 초기화 가능
-                    pm.setAlarmTimer1(null);
-                    pm.setAlarmTimer2(null);
-                    pm.setAlarmTimer3(null);
-                    pm.setAlarmTimer4(null);
-                    pm.setDose(null); // dose 기본값 설정
-                    pm.setDoseType(null); // doseType 기본값 설정
-                    pm.calculateTotalDrugNum(); // totalDrugNum 계산
+                    pm.setEndDate(null);
+                    pm.setNumPerDay(0);
+                    pm.setDose(null);
+                    pm.setDoseType(null);
+                    pm.calculateTotalDrugNum();
                     return pm;
                 })
                 .collect(Collectors.toList());
@@ -110,6 +103,11 @@ public class PrescriptionService {
                 prescriptionMedicines.toArray(new PrescriptionMedicine[0]));
         prescription.setName(disease.getName());
         prescription.setDescription(disease.getExplain());
+        prescription.setAlarmTimer1(requestDto.getAlarmTimer1());
+        prescription.setAlarmTimer2(requestDto.getAlarmTimer2());
+        prescription.setAlarmTimer3(requestDto.getAlarmTimer3());
+        prescription.setAlarmTimer4(requestDto.getAlarmTimer4());
+        prescription.setNumPerDay(requestDto.getNumPerDay()); // NumPerDay 추가
         log.debug("새로운 처방전 객체 생성 및 이름/설명 설정 완료. Name: {}, Description: {}", prescription.getName(), prescription.getDescription());
 
         // 5. 저장
@@ -119,37 +117,32 @@ public class PrescriptionService {
         return prescription.getId();
     }
 
-    // 진단서 ID로 하나의 진단서 조회 메서드 추가
     public Prescription findOnePrescription(Long prescriptionId) {
         log.info("findOnePrescription 호출됨. prescriptionId: {}", prescriptionId);
         return prescriptionRepository.findById(prescriptionId)
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found with ID: " + prescriptionId));
     }
 
-    // Member ID로 모든 처방전 조회 (새로 추가)
     public List<Prescription> findPrescriptionsByMemberId(Long memberId) {
         log.info("findPrescriptionsByMemberId 호출됨. memberId: {}", memberId);
         return prescriptionRepository.findByMember_Id(memberId);
     }
 
-    // 질병 이름으로 처방전을 찾는 메서드 추가
     public List<Prescription> findPrescriptionsByDiseaseName(Long memberId, String diseaseName) {
         log.info("findPrescriptionsByDiseaseName 호출됨. memberId: {}, diseaseName: {}", memberId, diseaseName);
         return prescriptionRepository.findByMember_IdAndDisease_NameContainingIgnoreCase(memberId, diseaseName);
     }
 
-    @Transactional // 트랜잭션 추가
+    @Transactional
     public Long findOrCreatePrescriptionForDisease(Long memberId, String diseaseName, LocalDate prescriptionDate) {
         log.info("findOrCreatePrescriptionForDisease 호출됨. memberId: {}, diseaseName: {}", memberId, diseaseName);
 
-        // 1. 해당 질병명으로 처방전이 있는지 확인
         List<Prescription> existingPrescriptions = prescriptionRepository.findByMember_IdAndDisease_NameContainingIgnoreCase(memberId, diseaseName);
         if (!existingPrescriptions.isEmpty()) {
             log.info("Existing prescription for disease '{}' found for member {}. ID: {}", diseaseName, memberId, existingPrescriptions.get(0).getId());
             return existingPrescriptions.get(0).getId();
         }
 
-        // 2. 멤버 조회
         Member member = memberRepository.findById(memberId);
         if (member == null) {
             log.error("멤버를 찾을 수 없습니다. memberId: {}", memberId);
@@ -157,18 +150,14 @@ public class PrescriptionService {
         }
         log.debug("멤버 조회 성공: {}", member.getName());
 
-        // 3. 질병 조회 또는 생성
-        // diseaseRepository.findOrCreateDisease(diseaseName) 대신 diseaseService.findOrCreateDisease(diseaseName) 호출
-        Disease disease = diseaseService.findOrCreateDisease(diseaseName); // DiseaseService의 findOrCreateDisease 사용
+        Disease disease = diseaseService.findOrCreateDisease(diseaseName);
         log.debug("질병 조회 또는 생성 성공: {}", disease.getName());
 
-        // 4. 새로운 처방전 생성
         Prescription newPrescription = Prescription.createEmptyPrescription(member, prescriptionDate);
         newPrescription.setDisease(disease);
         newPrescription.setName(disease.getName());
         newPrescription.setDescription(disease.getExplain());
 
-        // 5. 저장
         prescriptionRepository.save(newPrescription);
         log.info("New prescription for disease '{}' created for member {}. ID: {}", diseaseName, memberId, newPrescription.getId());
         return newPrescription.getId();
@@ -205,7 +194,7 @@ public class PrescriptionService {
     }
 
     @Transactional
-    public void addMedicineToPrescription(Long memberId, Long prescriptionId, PrescriptionMedicineRequestDto requestDto) { // DTO로 변경
+    public void addMedicineToPrescription(Long memberId, Long prescriptionId, PrescriptionMedicineRequestDto requestDto) {
         log.info("addMedicineToPrescription 호출됨. memberId: {}, prescriptionId: {}, medicineName: {}",
                 memberId, prescriptionId, requestDto.getMedicineName());
 
@@ -228,7 +217,7 @@ public class PrescriptionService {
                 log.error("약을 찾을 수 없습니다. medicineName: {}", requestDto.getMedicineName());
                 throw new IllegalArgumentException("Medicine not found with name: " + requestDto.getMedicineName());
             }
-            medicine = medicines.get(0); // 첫 번째 약 사용
+            medicine = medicines.get(0);
         } else {
             throw new IllegalArgumentException("Medicine ID or Name must be provided.");
         }
@@ -239,13 +228,9 @@ public class PrescriptionService {
         prescriptionMedicine.setMedicine(medicine);
         prescriptionMedicine.setStartDate(requestDto.getStartDate());
         prescriptionMedicine.setEndDate(requestDto.getEndDate());
-        prescriptionMedicine.setNumPerDay(requestDto.getNumPerDay() != null ? requestDto.getNumPerDay() : 0); // null 체크 및 기본값 설정
-        prescriptionMedicine.setAlarmTimer1(requestDto.getAlarmTimer1());
-        prescriptionMedicine.setAlarmTimer2(requestDto.getAlarmTimer2());
-        prescriptionMedicine.setAlarmTimer3(requestDto.getAlarmTimer3());
-        prescriptionMedicine.setAlarmTimer4(requestDto.getAlarmTimer4());
-        prescriptionMedicine.setDose(requestDto.getDose()); // dose 설정
-        prescriptionMedicine.setDoseType(requestDto.getDoseType()); // doseType 설정
+        prescriptionMedicine.setNumPerDay(requestDto.getNumPerDay() != null ? requestDto.getNumPerDay() : 0);
+        prescriptionMedicine.setDose(requestDto.getDose());
+        prescriptionMedicine.setDoseType(requestDto.getDoseType());
         // totalDrugNum은 setter에서 자동으로 계산됨 (PrescriptionMedicine 엔티티에서 처리)
 
         prescription.addMedicine(prescriptionMedicine);

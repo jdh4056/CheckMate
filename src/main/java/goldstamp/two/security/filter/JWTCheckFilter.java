@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/security/filter/JWTCheckFilter.java
 package goldstamp.two.security.filter;
 
 import com.google.gson.Gson;
@@ -54,9 +55,8 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             String loginId = (String) claims.get("loginId");
             String password = (String) claims.get("password");
             String name = (String) claims.get("name");
-            Boolean social = (Boolean) claims.get("social");
             List<String> roleNames = (List<String>) claims.get("roleNames");
-            MemberDto memberDTO = new MemberDto(id, loginId, password, name, social.booleanValue(),
+            MemberDto memberDTO = new MemberDto(id, loginId, password, name,
                     roleNames);
             log.info("-----------------------------------");
             log.info(memberDTO);

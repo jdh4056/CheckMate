@@ -3,6 +3,8 @@ package goldstamp.two.repository;
 import goldstamp.two.domain.Prescription;
 import org.springframework.data.jpa.repository.EntityGraph; // EntityGraph 임포트 추가
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying; // @Modifying 임포트 추가
+import org.springframework.data.jpa.repository.Query; // @Query 임포트 추가
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +24,8 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
     // Member ID와 질병 이름으로 처방전 리스트 조회 (추가)
     @EntityGraph(attributePaths = {"disease", "prescriptionMedicines", "prescriptionMedicines.medicine"})
     List<Prescription> findByMember_IdAndDisease_NameContainingIgnoreCase(Long memberId, String diseaseName);
+
+    @Modifying // DELETE, UPDATE 쿼리 시 필요
+    @Query("delete from Prescription p where p.member.id = :memberId")
+    void deleteByMember_Id(Long memberId);
 }

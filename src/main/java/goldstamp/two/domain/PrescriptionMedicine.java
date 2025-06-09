@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/domain/PrescriptionMedicine.java
 package goldstamp.two.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -6,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 @Entity
@@ -41,18 +41,6 @@ public class PrescriptionMedicine {
 
     @Column(nullable = true) // int 대신 Integer로 변경하여 NULL 허용
     private Integer totalDrugNum; // 총 복용량 (계산 필드)
-
-    @Column(nullable = true) // NULL 허용
-    private LocalTime alarmTimer1; // 알람 시간 1
-
-    @Column(nullable = true) // NULL 허용
-    private LocalTime alarmTimer2; // 알람 시간 2
-
-    @Column(nullable = true) // NULL 허용
-    private LocalTime alarmTimer3; // 알람 시간 3
-
-    @Column(nullable = true) // NULL 허용
-    private LocalTime alarmTimer4; // 알람 시간 4
 
     // 새롭게 추가된 필드: 용량 및 용량 타입
     @Column(nullable = true) // NULL 허용

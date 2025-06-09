@@ -1,9 +1,9 @@
+// front + back/back/main/java/goldstamp/two/dto/PrescriptionMedicineRequestDto.java
 package goldstamp.two.dto;
 
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
 public class PrescriptionMedicineRequestDto {
@@ -12,10 +12,6 @@ public class PrescriptionMedicineRequestDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer numPerDay; // int 대신 Integer로 변경
-    private LocalTime alarmTimer1;
-    private LocalTime alarmTimer2;
-    private LocalTime alarmTimer3;
-    private LocalTime alarmTimer4;
     private Integer dose; // 복용량 숫자 추가
     private String doseType; // 복용량 타입 추가
 }
