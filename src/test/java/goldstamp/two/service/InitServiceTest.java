@@ -14,7 +14,7 @@ public class InitServiceTest {
     InitService initService;
 
     @Test
-    @EnabledIfEnvironmentVariable(named = "RUN_FIRST_TIME_TEST", matches = "true")
+    //@EnabledIfEnvironmentVariable(named = "RUN_FIRST_TIME_TEST", matches = "true")
     public void init() {
         initService.dbInit1();
         initService.dbInit2();
