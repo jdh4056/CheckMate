@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/security/CustomUserDetailsService.java
 package goldstamp.two.security;
 
 import goldstamp.two.domain.Member;
@@ -36,14 +37,13 @@ public class CustomUserDetailsService implements UserDetailsService {
                 member.getLoginId(),
                 member.getPassword(),
                 member.getName(),
-                member.isSocial(),
-                member.getMemberRoleList()
-                        .stream()
-                        .map(memberRole -> memberRole.name()).collect(Collectors.toList()));
+                member.getMemberRoleList() //
+                        .stream() //
+                        .map(memberRole -> memberRole.name()).collect(Collectors.toList())); //
 
-                log.info(memberDTO);
+        log.info(memberDTO);
 
-                return memberDTO;
+        return memberDTO;
 
-        }
+    }
 }

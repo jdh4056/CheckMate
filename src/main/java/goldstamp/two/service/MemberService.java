@@ -1,9 +1,12 @@
+// front + back/back/main/java/goldstamp/two/service/MemberService.java
 package goldstamp.two.service;
 
 import goldstamp.two.domain.Member;
 import goldstamp.two.dto.MemberRequestDto;
 import goldstamp.two.repository.MemberRepository;
 import goldstamp.two.repository.MemberRepositoryClass;
+import goldstamp.two.repository.MemoRepository; // MemoRepository 임포트 추가
+import goldstamp.two.repository.PrescriptionRepository; // PrescriptionRepository 임포트 추가
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,8 @@ public class MemberService {
     private final MemberRepositoryClass memberRepositoryClass;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PrescriptionRepository prescriptionRepository; // PrescriptionRepository 주입
+    private final MemoRepository memoRepository; // MemoRepository 주입
 
     //회원 가입
     @Transactional
@@ -84,7 +89,12 @@ public class MemberService {
         if (member == null) {
             throw new IllegalArgumentException("Invalid member ID");
         }
+
+        // 회원과 연관된 Prescription 삭제 (FK 제약조건 때문에 먼저 삭제)
+        prescriptionRepository.deleteByMember_Id(id); // Member ID로 Prescription 삭제
+        // 회원과 연관된 Memo 삭제 (FK 제약조건 때문에 먼저 삭제)
+        memoRepository.deleteByMember_Id(id); // Member ID로 Memo 삭제
+
         memberRepository.deleteById(id);
     }
 }
-

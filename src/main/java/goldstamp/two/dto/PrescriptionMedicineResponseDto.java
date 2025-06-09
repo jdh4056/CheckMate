@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/dto/PrescriptionMedicineResponseDto.java
 package goldstamp.two.dto;
 
 import goldstamp.two.domain.PrescriptionMedicine;
@@ -7,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -20,10 +20,6 @@ public class PrescriptionMedicineResponseDto {
     private LocalDate endDate;
     private Integer numPerDay; // int 대신 Integer로 변경
     private Integer totalDrugNum; // int 대신 Integer로 변경
-    private LocalTime alarmTimer1;
-    private LocalTime alarmTimer2;
-    private LocalTime alarmTimer3;
-    private LocalTime alarmTimer4;
 
     // PrescriptionMedicine 엔티티를 DTO로 변환하는 팩토리 메서드
     public static PrescriptionMedicineResponseDto fromEntity(PrescriptionMedicine pm) {
@@ -41,10 +37,6 @@ public class PrescriptionMedicineResponseDto {
                 .endDate(pm.getEndDate())
                 .numPerDay(pm.getNumPerDay())
                 .totalDrugNum(pm.getTotalDrugNum())
-                .alarmTimer1(pm.getAlarmTimer1())
-                .alarmTimer2(pm.getAlarmTimer2())
-                .alarmTimer3(pm.getAlarmTimer3())
-                .alarmTimer4(pm.getAlarmTimer4())
                 .build();
     }
 }

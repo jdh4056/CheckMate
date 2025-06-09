@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/dto/MemberDto.java
 package goldstamp.two.dto;
 
 import lombok.Getter;
@@ -14,11 +15,9 @@ public class MemberDto extends User {
 
     private String loginId, password, name;
 
-    private boolean social;
-
     private List<String> roleNames = new ArrayList<>(); //권한 이름 목록
 
-    public MemberDto(Long id, String loginId, String password, String name, Boolean social, List<String> roleNames) {
+    public MemberDto(Long id, String loginId, String password, String name, List<String> roleNames) { //
         super(
                 loginId,
                 password,
@@ -27,7 +26,6 @@ public class MemberDto extends User {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
-        this.social = social;
         this.roleNames = roleNames;
     }
 
@@ -39,8 +37,7 @@ public class MemberDto extends User {
         dataMap.put("loginId", loginId);
         dataMap.put("password",password);
         dataMap.put("name", name);
-        dataMap.put("social", social);
-        dataMap.put("roleNames", roleNames);
+        dataMap.put("roleNames", roleNames); //
 
         return dataMap;
     }

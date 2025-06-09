@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/domain/Member.java
 package goldstamp.two.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -24,14 +25,11 @@ public class Member {
 
     @Column(unique = true, nullable = false)
     private String loginId; // 이메일이나 사용자 ID
-  
+
     private String name; //사용자 닉네임
 
     @JsonIgnore
     private String password; //사용자 비밀번호
-
-    @Column(nullable = false, columnDefinition = "NUMBER(1,0) DEFAULT 0")
-    private boolean social; //소셜 로그인 여부
 
     @ElementCollection(fetch = FetchType.LAZY) //권한 목록 (일반 사용자, 관리자 등)
     @Enumerated(EnumType.STRING)
@@ -55,19 +53,10 @@ public class Member {
         this.password = pw;
     }
 
-    public void changeSocial(boolean social) {
-        this.social = social;
-    }
-
     @JsonIgnore
     @OneToMany(mappedBy = "member")
+    @Builder.Default // 이 줄을 추가합니다.
     private List<Prescription> prescriptions = new ArrayList<>();
-
-    @Embedded
-    private CurrentMed currentMed;
-
-    @Embedded
-    private NextMed nextMed;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -78,5 +67,3 @@ public class Member {
 
     private double weight;
 }
-
-

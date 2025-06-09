@@ -1,3 +1,4 @@
+// front + back/back/test/java/goldstamp/two/service/MemberServiceTest.java
 package goldstamp.two.service;
 
 import goldstamp.two.domain.Gender;
@@ -91,7 +92,7 @@ public class MemberServiceTest {
         Member member = new Member();
         member.setLoginId("testuser");
         member.setPassword("password123"); // 서비스에서 암호화
-        member.changeName("oldname");
+        member.setName("oldname");
         member.addRole(MemberRole.USER);
         long savedId = memberService.join(member); // 회원 가입
 

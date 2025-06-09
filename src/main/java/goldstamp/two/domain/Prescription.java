@@ -1,3 +1,4 @@
+// front + back/back/main/java/goldstamp/two/domain/Prescription.java
 package goldstamp.two.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -6,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +39,22 @@ public class Prescription {
     @Column(length = 3000)
     private String description;
 
-    private LocalDate prescriptionDate; //
+    private LocalDate prescriptionDate;
+
+    @Column(nullable = true)
+    private LocalTime alarmTimer1;
+
+    @Column(nullable = true)
+    private LocalTime alarmTimer2;
+
+    @Column(nullable = true)
+    private LocalTime alarmTimer3;
+
+    @Column(nullable = true)
+    private LocalTime alarmTimer4;
+
+    @Column(name = "num_per_day", nullable = true) // num_per_day 컬럼 추가
+    private Integer numPerDay; // Integer 타입으로 매핑
 
     public void setMember(Member member) {
         this.member = member;
@@ -60,7 +77,7 @@ public class Prescription {
         for (PrescriptionMedicine prescriptionMedicine : prescriptionMedicines ) {
             prescription.addMedicine(prescriptionMedicine);
         }
-        prescription.setPrescriptionDate(prescriptionDate); // 인자로 받은 날짜 설정
+        prescription.setPrescriptionDate(prescriptionDate);
         return prescription;
     }
 
