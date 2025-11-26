@@ -6,6 +6,8 @@
 ## 앱 화면
 <img width="198" height="295" alt="image" src="https://github.com/user-attachments/assets/84348051-9e68-4e4b-bfca-b26b223129d0" />
 
+---
+
 ## 인프라 아키텍처 개요
 본 프로젝트는 제한된 리소스 내에서 최적의 성능과 보안을 확보하는 것을 목표로 설계
 
